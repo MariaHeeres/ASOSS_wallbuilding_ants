@@ -1,3 +1,7 @@
+patches-own[
+pheromone
+]
+
 to setup
   ;; (for this model to work with NetLogo's new plotting features,
   ;; __clear-all-and-reset-ticks should be replaced with clear-all at
@@ -7,8 +11,8 @@ to setup
   set-default-shape turtles "bug"
 
   ask patches [ if random-float 100 < density
-  [ set pcolor yellow ] ]
-
+  [ set pcolor yellow ]
+  set pheromone 0]
 
   create-turtles number [
     set color white
@@ -21,6 +25,10 @@ to go
  ask turtles [ pickup-stone ]
  ask turtles [ drop-stone ]
  ask turtles [ wiggle ]
+ ask turtles [ drop-pheromone ]
+ diffuse pheromone 0.1
+ ask patches[ if pheromone > 0.1 [set pheromone pheromone * 0.9]]
+ ask patches[ pheromone-colour]
  tick
 
 end
@@ -28,15 +36,15 @@ end
 to pickup-stone
   if color != orange
   [ if [ pcolor ] of patch-ahead 1 = yellow
-    [ if random-float 1 < (1 - calc-template 0 ) * (1 - calc-stigmergy 0 )
+    [ if random-float 1 < (1 - calc-template 0 ) * (1 - calc-stone-stigmergy 0 ) * (1 - calc-pheromone-stigmergy 0 )
       [ ask patch-ahead 1 [ set pcolor black ]
         set color orange ] ] ]
 end
 
 to drop-stone
   if color = orange
-  [ if [ pcolor ] of patch-ahead 1 = black and not any? turtles-on patch-ahead 1
-    [ if random-float 1 < calc-template 1 * calc-stigmergy 1
+  [ if (not ([ pcolor ] of patch-ahead 1 = yellow)) and not any? turtles-on patch-ahead 1
+    [ if random-float 1 < calc-template 1 * calc-stone-stigmergy 1 * calc-pheromone-stigmergy 1
       [ ask patch-ahead 1 [ set pcolor yellow ]
         set color white
         rt 180 ] ] ]
@@ -48,15 +56,36 @@ to-report calc-template [ default ]
   [ report default ]
 end
 
-to-report calc-stigmergy [ default ]
+to-report calc-stone-stigmergy [ default ]
   ifelse stigmergy
   [ report (count (patch-set patch-right-and-ahead 30 2 patch-left-and-ahead 30 2 patch-ahead 2) with [ pcolor = yellow ]) / 3 ]
   [ report default ]
 end
 
+to-report calc-ant-stigmergy [ default threshold]
+  ifelse stigmergy and (count (turtles-on neighbors) > threshold)
+  [ report (1 - default) ]
+  [ report default ]
+end
+
+to-report calc-pheromone-stigmergy [ default]
+  ifelse stigmergy and (([pheromone] of patch-ahead 1) > 5)
+  [ report (1 - default) ]
+  [ report default ]
+end
+
+to drop-pheromone
+  ask patch-here[set pheromone pheromone + pheromone-drop-concentration]
+end
+
+to pheromone-colour
+  if not (pcolor = yellow)
+  [set pcolor scale-color blue pheromone 0 10]
+end
+
 to wiggle
   rt random-float 90 - random-float 90
-  if (([ pcolor ] of patch-ahead 1) = black)
+  if not (([ pcolor ] of patch-ahead 1) = yellow)
   [ fd 1 ]
 end
 @#$#@#$#@
@@ -130,7 +159,7 @@ number
 number
 1
 300
-200.0
+100.0
 1
 1
 ants
@@ -145,7 +174,7 @@ density
 density
 0.0
 100.0
-10.0
+15.0
 1.0
 1
 %
@@ -192,7 +221,7 @@ template-radius
 template-radius
 5
 25
-20.0
+15.0
 1
 1
 units
@@ -219,6 +248,21 @@ stigmergy
 0
 1
 -1000
+
+SLIDER
+6
+283
+203
+316
+pheromone-drop-concentration
+pheromone-drop-concentration
+0
+100
+20.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -553,7 +597,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.2
+NetLogo 6.2.0
 @#$#@#$#@
 setup
 ask turtles [ repeat 150 [ go ] ]
