@@ -98,15 +98,7 @@ to-report calc-ant-stigmergy [ default threshold]
   [ report default ]
 end
 
-to-report calc-sim-pheromone-stigmergy [ default]
-  if not pheromone-stigmergy
-  [ report 1 ]
-  ifelse pheromone-simulator and (([sim-pheromone] of patch-ahead 1) > 1)
-  [ report (1 - default) ]
-  [ report default ]
-end
-
-to-report calc-pheromone-stigmergy [ default]
+to-report calc-spheromone-stigmergy [ default]
   if not pheromone-stigmergy
   [ report 1 ]
   ifelse pheromone-stigmergy and (([pheromone] of patch-ahead 1) > 1)
