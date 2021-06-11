@@ -33,13 +33,14 @@ to go
  ask turtles [ drop-stone ]
  ask turtles [ wiggle ]
  ask turtles [ drop-pheromone ]
+ ;ask turtles [ output-print [sim-pheromone] of patch-ahead 1]
  diffuse pheromone 0.1
  diffuse sim-pheromone 0.2
  ask patches[ if pheromone > 0.1 [set pheromone pheromone * 0.9]]
  ask patches[ if sim-pheromone > 0.1 [set sim-pheromone sim-pheromone * 0.98]]
  ask patches[ pheromone-colour]
  set counter counter + 1
- if pheromone-simulator and counter = pherotimer
+ if pheromone-sim-stigmergy and counter >= pherotimer
   [set counter 0
     set patch-amount 0
     ask patches[ count-patches ]
@@ -51,14 +52,14 @@ to go
 end
 
 to simulate-pheromone
-  if (not (pcolor = yellow)) and distancexy 0 0 > template-radius - 1
-    and distancexy 0 0 < template-radius + 1
+  if (not (pcolor = yellow)) and distancexy 0 0 > template-radius - 0.25 * template-width
+    and distancexy 0 0 < template-radius + 0.25 * template-width
   [ set sim-pheromone pherosim-amount / patch-amount]
 end
 
 to count-patches
-  if (not (pcolor = yellow)) and distancexy 0 0 > template-radius - 1
-    and distancexy 0 0 < template-radius + 1
+  if (not (pcolor = yellow)) and distancexy 0 0 > template-radius - 0.25 * template-width
+    and distancexy 0 0 < template-radius + 0.25 * template-width
     [set patch-amount patch-amount + 1]
 
 end
@@ -66,7 +67,7 @@ end
 to pickup-stone
   if color != orange
   [ if [ pcolor ] of patch-ahead 1 = yellow
-    [ if random-float 1 < (1 - calc-template 0 ) * (1 - calc-stone-stigmergy 0 ) * (calc-pheromone-stigmergy 0 )
+    [ if random-float 1 < (1 - calc-template 0 ) * (1 - calc-stone-stigmergy 0 ) * (calc-pheromone-stigmergy 0 ) * (calc-sim-pheromone-stigmergy 0 )
       [ ask patch-ahead 1 [ set pcolor black ]
         set color orange ] ] ]
 end
@@ -74,7 +75,7 @@ end
 to drop-stone
   if color = orange
   [ if (not ([ pcolor ] of patch-ahead 1 = yellow)) and not any? turtles-on patch-ahead 1
-    [ if random-float 1 < calc-template 1 * calc-stone-stigmergy 1 * calc-pheromone-stigmergy 1
+    [ if random-float 1 < calc-template 1 * calc-stone-stigmergy 1 * calc-pheromone-stigmergy 1 * calc-sim-pheromone-stigmergy 1
       [ ask patch-ahead 1 [ set pcolor yellow ]
         set color white
         rt 180 ] ] ]
@@ -98,20 +99,38 @@ to-report calc-ant-stigmergy [ default threshold]
   [ report default ]
 end
 
-to-report calc-sim-pheromone-stigmergy [ default]
+to-report calc-pheromone-stigmergy-threshold [ default]
   if not pheromone-stigmergy
   [ report 1 ]
-  ifelse pheromone-simulator and (([sim-pheromone] of patch-ahead 1) > 1)
+  ifelse ([pheromone] of patch-ahead 1) > 1
   [ report (1 - default) ]
   [ report default ]
 end
 
-to-report calc-pheromone-stigmergy [ default]
-  if not pheromone-stigmergy
+to-report calc-sim-pheromone-stigmergy-threshold [ default]
+  if not pheromone-sim-stigmergy
   [ report 1 ]
-  ifelse pheromone-stigmergy and (([pheromone] of patch-ahead 1) > 1)
+  ifelse ([sim-pheromone] of patch-ahead 1) > 1
   [ report (1 - default) ]
   [ report default ]
+end
+
+to-report calc-pheromone-stigmergy [ default ]
+  ifelse pheromone-stigmergy
+  [ ifelse ([pheromone] of patch-ahead 1) > 5
+    [ report 1 - default ]
+    [ report 1 - ([pheromone] of patch-ahead 1) / 5]
+  ]
+  [report 1]
+end
+
+to-report calc-sim-pheromone-stigmergy [ default ]
+  ifelse pheromone-sim-stigmergy
+  [ ifelse ([sim-pheromone] of patch-ahead 1) > (pherosim-amount / 50)
+    [ report 1 - default ]
+    [ report 1 - ([sim-pheromone] of patch-ahead 1) / (pherosim-amount / 50)]
+  ]
+  [report 1]
 end
 
 to drop-pheromone
@@ -121,8 +140,8 @@ end
 to pheromone-colour
   if not (pcolor = yellow)
   [ ifelse pheromone > sim-pheromone
-    [set pcolor scale-color blue pheromone 0 10]
-    [set pcolor scale-color red sim-pheromone 0 10]
+    [set pcolor scale-color blue pheromone 0 5]
+    [set pcolor scale-color red sim-pheromone 0 (pherosim-amount / 50)]
   ]
 end
 
@@ -301,7 +320,7 @@ pheromone-drop-concentration
 pheromone-drop-concentration
 0
 100
-14.0
+10.0
 1
 1
 NIL
@@ -347,11 +366,11 @@ HORIZONTAL
 SWITCH
 70
 505
-244
+268
 538
-pheromone-simulator
-pheromone-simulator
-0
+pheromone-sim-stigmergy
+pheromone-sim-stigmergy
+1
 1
 -1000
 
@@ -364,7 +383,7 @@ pherosim-amount
 pherosim-amount
 0
 1000
-306.0
+242.0
 1
 1
 NIL
