@@ -51,12 +51,16 @@ to go
 
 end
 
+;; This function is used to simulate ants moving in and out of the nest.
+;; (Currently not intended for use)
 to simulate-pheromone
   if (not (pcolor = yellow)) and distancexy 0 0 > template-radius - 0.25 * template-width
     and distancexy 0 0 < template-radius + 0.25 * template-width
   [ set sim-pheromone pherosim-amount / patch-amount]
 end
 
+;; This function counts the number of empty patches in the wall.
+;; (Currently not intended for use)
 to count-patches
   if (not (pcolor = yellow)) and distancexy 0 0 > template-radius - 0.25 * template-width
     and distancexy 0 0 < template-radius + 0.25 * template-width
@@ -64,6 +68,8 @@ to count-patches
 
 end
 
+;; This function is used to determine whether or not an agent picks up a stone.
+;; This is determined by the template and the different stigmergies used.
 to pickup-stone
   if color != orange
   [ if [ pcolor ] of patch-ahead 1 = yellow
@@ -72,6 +78,8 @@ to pickup-stone
         set color orange ] ] ]
 end
 
+;; This function is used to determine whether or not an agent drops a stone.
+;; This is determined by the template and the different stigmergies used.
 to drop-stone
   if color = orange
   [ if (not ([ pcolor ] of patch-ahead 1 = yellow)) and not any? turtles-on patch-ahead 1
@@ -81,24 +89,35 @@ to drop-stone
         rt 180 ] ] ]
 end
 
+;; This function uses the template width and template radius to determine the wall template.
+;; This template is then used to increase stone drop chance at the template location,
+;; and decrease stone pick up chance there.
 to-report calc-template [ default ]
   ifelse template
   [ report (1 / (1 + template-width  * (distancexy 0 0 - template-radius)^(2))) ]
   [ report default ]
 end
 
+;; This function looks at the stones in front of the agent and makes the agent more
+;; likely to drop stones next to other stones and to pick up solitary stones.
 to-report calc-stone-stigmergy [ default ]
   ifelse rock-stigmergy
   [ report (count (patch-set patch-right-and-ahead 30 2 patch-left-and-ahead 30 2 patch-ahead 2) with [ pcolor = yellow ]) / 3 ]
   [ report default ]
 end
 
+;; This function makes ants less likely to srop stones near other ants
+;; (Currently not intended for use)
 to-report calc-ant-stigmergy [ default threshold]
   ifelse ant-stigmergy and (count (turtles-on neighbors) > threshold)
   [ report (1 - default) ]
   [ report default ]
 end
 
+;; This uses the pheromone dropped by ants to determine whether or not
+;; an ant should pick up a stone. Ants check the space in front of themselves.
+;; This one uses a threshold and returns either 1 or 0
+;; (Currently not intended for use)
 to-report calc-pheromone-stigmergy-threshold [ default]
   if not pheromone-stigmergy
   [ report 1 ]
@@ -107,6 +126,10 @@ to-report calc-pheromone-stigmergy-threshold [ default]
   [ report default ]
 end
 
+;; This uses the pheromone dropped at entrances to determine whether or not
+;; an ant should pick up a stone. Ants check the space in front of themselves.
+;; This one uses a threshold and returns either 1 or 0
+;; (Currently not intended for use)
 to-report calc-sim-pheromone-stigmergy-threshold [ default]
   if not pheromone-sim-stigmergy
   [ report 1 ]
@@ -115,6 +138,9 @@ to-report calc-sim-pheromone-stigmergy-threshold [ default]
   [ report default ]
 end
 
+;; This uses the pheromone dropped by ants to determine whether or not
+;; an ant should pick up a stone. Ants check the space in front of themselves.
+;; This functions returns a chance based on how concentrated the pheromone is.
 to-report calc-pheromone-stigmergy [ default ]
   ifelse pheromone-stigmergy
   [ ifelse ([pheromone] of patch-ahead 1) > 5
@@ -124,6 +150,10 @@ to-report calc-pheromone-stigmergy [ default ]
   [report 1]
 end
 
+;; This uses the pheromone dropped at entrances to determine whether or not
+;; an ant should pick up a stone. Ants check the space in front of themselves.
+;; This functions returns a chance based on how concentrated the pheromone is.
+;; (Currently not intended for use)
 to-report calc-sim-pheromone-stigmergy [ default ]
   ifelse pheromone-sim-stigmergy
   [ ifelse ([sim-pheromone] of patch-ahead 1) > (pherosim-amount / 50)
@@ -133,10 +163,13 @@ to-report calc-sim-pheromone-stigmergy [ default ]
   [report 1]
 end
 
+;; This function makes ants drop pheromones at their current location
 to drop-pheromone
   ask patch-here[set pheromone pheromone + pheromone-drop-concentration]
 end
 
+;; This function colours the patches that have pheromone on them
+;; based on the concentration of the pheromone
 to pheromone-colour
   if not (pcolor = yellow)
   [ ifelse pheromone > sim-pheromone
@@ -145,7 +178,11 @@ to pheromone-colour
   ]
 end
 
+;; This function is used by ants to determine their movement.
+;; Ants will always wiggle, and if turned on will also follow pheromones.
 to wiggle
+  if pheromone-following
+  [face max-one-of (patch-set patch-right-and-ahead 45 1 patch-left-and-ahead 45 1 patch-ahead 1) [pheromone]]
   rt random-float 90 - random-float 90
   if not (([ pcolor ] of patch-ahead 1) = yellow)
   [ fd 1 ]
@@ -221,7 +258,7 @@ number
 number
 1
 300
-100.0
+50.0
 1
 1
 ants
@@ -312,36 +349,36 @@ rock-stigmergy
 -1000
 
 SLIDER
-6
-283
-203
-316
+195
+446
+392
+479
 pheromone-drop-concentration
 pheromone-drop-concentration
 0
 100
-10.0
+15.0
 1
 1
 NIL
 HORIZONTAL
 
 SWITCH
-35
-334
-169
-367
+39
+284
+173
+317
 ant-stigmergy
 ant-stigmergy
-1
+0
 1
 -1000
 
 SWITCH
-64
-403
-241
-436
+207
+408
+384
+441
 pheromone-stigmergy
 pheromone-stigmergy
 0
@@ -349,10 +386,10 @@ pheromone-stigmergy
 -1000
 
 SLIDER
-119
-455
-291
-488
+404
+482
+576
+515
 pherotimer
 pherotimer
 1
@@ -364,10 +401,10 @@ NIL
 HORIZONTAL
 
 SWITCH
-70
-505
-268
-538
+393
+408
+591
+441
 pheromone-sim-stigmergy
 pheromone-sim-stigmergy
 1
@@ -375,19 +412,30 @@ pheromone-sim-stigmergy
 -1000
 
 SLIDER
-252
-407
-424
-440
+403
+446
+575
+479
 pherosim-amount
 pherosim-amount
 0
 1000
-242.0
+261.0
 1
 1
 NIL
 HORIZONTAL
+
+SWITCH
+211
+484
+382
+517
+pheromone-following
+pheromone-following
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
