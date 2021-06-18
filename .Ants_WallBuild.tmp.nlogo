@@ -56,7 +56,7 @@ to go
       [ask patches[ simulate-pheromone ]]
   ]
  set flood-fill-counter flood-fill-counter + 1
- if counter > 10000 and flood-fill-counter > 50
+ if counter > 50000 and flood-fill-counter > 50
   [ set entrance entrance + flood-fill
     set amount-of-flood-fills amount-of-flood-fills + 1
     set flood-fill-counter 0
@@ -402,7 +402,7 @@ SWITCH
 317
 ant-stigmergy
 ant-stigmergy
-0
+1
 1
 -1000
 
@@ -413,7 +413,7 @@ SWITCH
 441
 pheromone-stigmergy
 pheromone-stigmergy
-0
+1
 1
 -1000
 
@@ -857,7 +857,7 @@ ask turtles [ repeat 150 [ go ] ]
       <value value="200"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="het-grote-experiment" repetitions="10" runMetricsEveryStep="false">
+  <experiment name="het-grote-experiment" repetitions="1" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="100000"/>
