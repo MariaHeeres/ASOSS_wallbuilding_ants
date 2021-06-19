@@ -290,7 +290,7 @@ number
 number
 1
 300
-50.0
+200.0
 1
 1
 ants
@@ -305,7 +305,7 @@ density
 density
 0.0
 100.0
-12.0
+15.0
 1.0
 1
 %
@@ -857,7 +857,7 @@ ask turtles [ repeat 150 [ go ] ]
       <value value="200"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="het-grote-experiment" repetitions="1" runMetricsEveryStep="false">
+  <experiment name="het-grote-experiment" repetitions="50" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="100000"/>
