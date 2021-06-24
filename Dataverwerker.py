@@ -29,9 +29,6 @@ with open('Ants_WallBuild_het_grote_experiment_table.csv') as csv_file:
 
 data = [[]for x in range(19)]
 
-print(density)
-print(ants)
-
 pheromone_stigmergy_true = []
 pheromone_stigmergy_false = []
 
