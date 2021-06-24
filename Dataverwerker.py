@@ -2,6 +2,7 @@ import csv
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from statistics import mean
 from scipy.stats import mannwhitneyu
 from pingouin import mwu
 
@@ -65,8 +66,8 @@ print("Mean with ant stigmergy: ", mean(ant_stigmergy_true))
 print("Mean without ant stigmergy: ", mean(ant_stigmergy_false))
 print(mwu(ant_stigmergy_true, ant_stigmergy_false, tail='one-sided'))
 print("pheromone and ant stigmergy:")
-print("Mean with pheromoneand ant stigmergy: ", mean(pheromone_stigmergy_true))
-print("Mean without pheromone and ant stigmergy: ", mean(pheromone_stigmergy_false))
+print("Mean with pheromoneand ant stigmergy: ", mean(pheromone_and_ant_stigmergy_true))
+print("Mean without pheromone and ant stigmergy: ", mean(pheromone_and_ant_stigmergy_false))
 print(mwu(pheromone_and_ant_stigmergy_true, pheromone_and_ant_stigmergy_false, tail='one-sided'))
 
 """
