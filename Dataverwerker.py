@@ -8,6 +8,8 @@ from pingouin import mwu
 pheromone_stigmergy = []
 ant_stigmergy = []
 entrance_percentage = []
+density = []
+ants = []
 
 with open('Ants_WallBuild_het_grote_experiment_table.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
@@ -17,7 +19,9 @@ with open('Ants_WallBuild_het_grote_experiment_table.csv') as csv_file:
         if skip_lines == 0:
             skip_lines += 1
         else:
+            density.append(row[4])
             pheromone_stigmergy.append(row[6])
+            ants.append(row[8])
             ant_stigmergy.append(row[13])
             entrance_percentage.append(float(row[15]))
             line_count += 1
@@ -53,10 +57,16 @@ for i in range(line_count):
         pheromone_and_ant_stigmergy_false.append(entrance_percentage[i])
 
 print("pheromone stigmergy:")
+print("Mean with pheromone stigmergy: ", mean(pheromone_stigmergy_true))
+print("Mean without pheromone stigmergy: ", mean(pheromone_stigmergy_false))
 print(mwu(pheromone_stigmergy_true, pheromone_stigmergy_false, tail='one-sided'))
 print("ant stigmergy:")
+print("Mean with ant stigmergy: ", mean(ant_stigmergy_true))
+print("Mean without ant stigmergy: ", mean(ant_stigmergy_false))
 print(mwu(ant_stigmergy_true, ant_stigmergy_false, tail='one-sided'))
 print("pheromone and ant stigmergy:")
+print("Mean with pheromoneand ant stigmergy: ", mean(pheromone_stigmergy_true))
+print("Mean without pheromone and ant stigmergy: ", mean(pheromone_stigmergy_false))
 print(mwu(pheromone_and_ant_stigmergy_true, pheromone_and_ant_stigmergy_false, tail='one-sided'))
 
 """
